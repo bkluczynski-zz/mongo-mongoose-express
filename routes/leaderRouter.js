@@ -28,33 +28,45 @@ leaderRouter.route('/')
       .catch(err => console.log(err));
   })
   .put((req, res, next) => {
-      res.statusCode = 403;
-      res.end('PUT operation not supported on leaders');
+    res.statusCode = 403;
+    res.end('PUT operation not supported on leaders');
   })
   .delete((req, res, next) => {
-      res.end('Delete all the leaders');
+    Leaders.remove({})
+      .then((response) => {
+        res.statusCode = 200;
+        res.setHeader('Content-type', 'application/json');
+        res.json(response);
+      }, err => next(err))
+      .catch(err => console.log(err));
   });
 
 
 leaderRouter.route('/:leaderid')
-    .all((req,res,next) => {
+  .get((req, res, next) => {
+    Leaders.findById(req.params.leaderid)
+      .then((leader) => {
         res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        next();
-    })
-    .get((req, res, next) => {
-        res.end('Will send the details of the leader ' + req.params.leaderid);
-    })
-    .post((req, res, next) => {
-        res.statusCode = 403;
-        res.end('POST operation not supported on leaders/' + req.params.leaderid);
-    })
-    .put((req, res, next) => {
-        res.write('Updating the leader: ' + req.params.leaderid);
-        res.end('Will update the leader ' + req.body.name + ' with details ' + req.body.description);
-    })
-    .delete((req, res, next) => {
-        res.end('Delete the leader: ' + req.params.leaderid);
-    });
+        res.setHeader('Content-type', 'application/json');
+        res.json(leader);
+      }, err => next(err))
+      .catch(err => console.log(err));
+  })
+  .post((req, res, next) => {
+    res.statusCode = 403;
+    res.end(`POST operation not supported on leaders/' + ${req.params.leaderid}`);
+  })
+  .put((req, res, next) => {
+    Leaders.findByIdAndUpdate(req.params.leaderid, req.body, { new: true })
+      .then((leader) => {
+        res.statusCode = 200;
+        res.setHeader('Content-type', 'application/json');
+        res.json(leader);
+      }, err => next(err))
+      .catch(err => console.log(err));
+  })
+  .delete((req, res, next) => {
+      res.end('Delete the leader: ' + req.params.leaderid);
+  });
 
 module.exports = leaderRouter;
