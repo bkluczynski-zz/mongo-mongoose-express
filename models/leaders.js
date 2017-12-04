@@ -6,6 +6,7 @@ const leaderSchema = new Schema({
   name: {
     type: String,
     required: true,
+    unique: true,
   },
   image: {
     type: String,
@@ -24,9 +25,11 @@ const leaderSchema = new Schema({
     required: true,
   },
   featured: {
-    type: String,
-    required: true,
+    type: Boolean,
+    default: false,
   },
+}, {
+  timestamps: true,
 });
 
 const Leaders = mongoose.model('Leader', leaderSchema);

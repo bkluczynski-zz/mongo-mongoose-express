@@ -9,18 +9,19 @@ const promotionSchema = new Schema({
   name: {
     type: String,
     required: true,
+    unique: true,
   },
   image: {
     type: String,
     required: true,
   },
-  descripton: {
+  description: {
     type: String,
     required: true,
   },
   featured: {
     type: Boolean,
-    required: true,
+    default: false,
   },
   label: {
     type: String,
@@ -31,6 +32,8 @@ const promotionSchema = new Schema({
     required: true,
     min: 0,
   },
+}, {
+  timestamps: true,
 });
 
 const Promotions = mongoose.model('Promotion', promotionSchema);

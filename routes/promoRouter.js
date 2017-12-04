@@ -53,7 +53,7 @@ promoRouter.route('/:promotionid')
   })
   .post((req, res, next) => {
     res.statusCode = 403;
-    res.end(`POST operation not supported on promotions/' + ${req.params.promotionid}`);
+    res.end(`POST operation not supported on promotions/ ${req.params.promotionid}`);
   })
   .put((req, res, next) => {
     Promotions.findByIdAndUpdate(req.params.promotionid, req.body, { new: true })

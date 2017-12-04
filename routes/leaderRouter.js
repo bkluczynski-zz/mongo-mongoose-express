@@ -54,7 +54,7 @@ leaderRouter.route('/:leaderid')
   })
   .post((req, res, next) => {
     res.statusCode = 403;
-    res.end(`POST operation not supported on leaders/' + ${req.params.leaderid}`);
+    res.end(`POST operation not supported on leaders/ ${req.params.leaderid}`);
   })
   .put((req, res, next) => {
     Leaders.findByIdAndUpdate(req.params.leaderid, req.body, { new: true })
