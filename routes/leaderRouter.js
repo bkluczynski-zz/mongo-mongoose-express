@@ -15,7 +15,7 @@ leaderRouter.route('/')
         res.setHeader('Content-type', 'application/json');
         res.json(leaders);
       }, err => next(err))
-      .catch(err => console.log(err))
+      .catch(err => console.log(err));
   })
   .post((req, res, next) => {
     Leaders.create(req.body)
