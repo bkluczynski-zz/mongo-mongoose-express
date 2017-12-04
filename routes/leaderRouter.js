@@ -66,7 +66,13 @@ leaderRouter.route('/:leaderid')
       .catch(err => console.log(err));
   })
   .delete((req, res, next) => {
-      res.end('Delete the leader: ' + req.params.leaderid);
+    Leaders.findByIdAndRemove(req.params.leaderid)
+      .then((response) => {
+        res.statusCode = 200;
+        res.setHeader('Content-type', 'application/json');
+        res.json(response);
+      }, err => console.log(err))
+      .catch(err => console.log(err));
   });
 
 module.exports = leaderRouter;
