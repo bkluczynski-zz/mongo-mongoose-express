@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 require('mongoose-currency').loadType(mongoose);
 
-const { Currency } = mongoose.Type;
+const { Currency } = mongoose.Types;
 
 const leaderSchema = new Schema({
   name: {
