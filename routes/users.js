@@ -15,11 +15,11 @@ router.post('/signup', (req, res, next) => {
   User.findOne({ username: req.body.username })
     .then((user) => {
       if (user) {
-        const err = new Error('User with this username already exists');
+        const err = new Error(`${user.username} already exists`);
         err.status = 403;
         next(err);
       } else {
-        User.create({
+        return User.create({
           username: req.body.username,
           password: req.body.password,
         });
@@ -74,6 +74,18 @@ router.post('/login', (req, res, next) => {
     res.statusCode = 200;
     res.setHeader('Content-type', 'text/plain');
     res.end('You are already authenticated');
+  }
+});
+
+router.get('/logout', (req, res, next) => {
+  if (req.session) {
+    req.session.destroy();
+    res.clearCookie('session-id');
+    res.redirect('/');
+  } else {
+    const err = new Error('You are not logged in');
+    err.status = 403;
+    next(err);
   }
 });
 
