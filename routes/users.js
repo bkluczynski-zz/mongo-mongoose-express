@@ -1,9 +1,13 @@
+/* eslint no-unused-vars: 1 */
+/* eslint no-underscore-dangle: 1 */
+
 const express = require('express');
 
 const router = express.Router();
 const bodyParser = require('body-parser');
 const User = require('../models/user');
 const passport = require('passport');
+const authenticate = require('../authenticate');
 
 router.use(bodyParser.json());
 
@@ -35,11 +39,17 @@ router.post('/signup', (req, res, next) => {
 });
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
+  //  getting the token upon successfull login with id that is being mounted on
+  //  the user by passport
+  const token = authenticate.getToken({ _id: req.user._id });
   res.statusCode = 200;
   res.setHeader('Content-type', 'application/json');
+  //  passing the token back to the client to extract it upon receiving res
+  //  token will be passed to headers of every subsequent request to the server
   res.json({
     success: true,
     status: 'You are successfully logged in!',
+    token,
   });
 });
 

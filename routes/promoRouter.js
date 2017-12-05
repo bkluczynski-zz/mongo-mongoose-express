@@ -1,6 +1,9 @@
+/* eslint no-unused-vars: 1 */
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const Promotions = require('../models/promotions');
+const authenticate = require('../authenticate');
 
 const promoRouter = express.Router();
 
@@ -16,7 +19,7 @@ promoRouter.route('/')
       }, err => next(err))
       .catch(err => console.log(err));
   })
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     Promotions.create(req.body)
       .then((promotion) => {
         console.log('Promotion has been entered', promotion);
@@ -26,11 +29,11 @@ promoRouter.route('/')
       }, err => next(err))
       .catch(err => console.log(err));
   })
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on promotions');
   })
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Promotions.remove({})
       .then((response) => {
         res.statusCode = 200;
@@ -51,11 +54,11 @@ promoRouter.route('/:promotionid')
       }, err => next(err))
       .catch(err => console.log(err));
   })
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on promotions/ ${req.params.promotionid}`);
   })
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     Promotions.findByIdAndUpdate(req.params.promotionid, req.body, { new: true })
       .then((promotion) => {
         res.statusCode = 200;
@@ -64,7 +67,7 @@ promoRouter.route('/:promotionid')
       }, err => next(err))
       .catch(err => console.log(err));
   })
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Promotions.findByIdAndRemove(req.params.promotionid)
       .then((response) => {
         res.statusCode = 200;

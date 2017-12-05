@@ -1,12 +1,18 @@
+/* eslint no-unused-vars: 1 */
+/* eslint no-underscore-dangle: 1 */
+/* eslint no-param-reassign: 1 */
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const Dishes = require('../models/dishes');
+const authenticate = require('../authenticate');
 
 const dishRouter = express.Router();
 
 dishRouter.use(bodyParser.json());
 
 dishRouter.route('/')
+//  gate open for getting info
   .get((req, res, next) => {
     Dishes.find({})
       .then((dishes) => {
@@ -16,7 +22,8 @@ dishRouter.route('/')
       }, err => next(err))
       .catch(err => next(err));
   })
-  .post((req, res, next) => {
+  //  authenticate the user in case the post method is needed
+  .post(authenticate.verifyUser, (req, res, next) => {
     Dishes.create(req.body)
       .then((dish) => {
         console.log('Dish Created', dish);
@@ -26,11 +33,11 @@ dishRouter.route('/')
       }, err => next(err))
       .catch(err => next(err));
   })
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on dishes');
   })
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Dishes.remove({})
       .then((response) => {
         res.statusCode = 200;
@@ -51,13 +58,13 @@ dishRouter.route('/:dishid')
       }, err => next(err))
       .catch(err => next(err));
   })
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
-    res.end('POST operation not supported on dishes/' + req.params.dishid);
+    res.end(`POST operation not supported on dishes/ ${req.params.dishid}`);
   })
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     Dishes.findByIdAndUpdate(req.params.dishid, {
-      $set: req.body
+      $set: req.body,
     }, { new: true })
       .then((dish) => {
         res.statusCode = 200;
@@ -66,7 +73,7 @@ dishRouter.route('/:dishid')
       }, err => next(err))
       .catch(err => next(err));
   })
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Dishes.findByIdAndRemove(req.params.dishid)
       .then((response) => {
         res.statusCode = 200;
@@ -87,12 +94,12 @@ dishRouter.route('/:dishid/comments')
         } else {
           const err = new Error(`Dish ${req.params.id} does not exist`);
           err.status = 404;
-          return next(err);
+          next(err);
         }
       }, err => next(err))
       .catch(err => next(err));
   })
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     Dishes.findById(req.params.dishid)
       .then((dish) => {
         if (dish) {
@@ -106,21 +113,21 @@ dishRouter.route('/:dishid/comments')
         } else {
           const err = new Error(`Dish ${req.params.dishid} does not exist`);
           err.status = 404;
-          return next(err);
+          next(err);
         }
         console.log('Comment created', dish);
       }, err => next(err))
       .catch(err => next(err));
   })
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end(`PUT operation not supported on /dishes/${req.params.dishid}/comments`);
   })
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Dishes.findById(req.params.dishid)
       .then((dish) => {
         if (dish) {
-          for (let i = (dish.comments.length - 1); i >= 0; i--) {
+          for (let i = (dish.comments.length - 1); i >= 0; i -= 1) {
             dish.comments.id(dish.comments[i]._id).remove();
           }
           console.log('dish, comments', dish.comments);
@@ -134,7 +141,7 @@ dishRouter.route('/:dishid/comments')
         } else {
           const err = new Error(`Dish ${req.params.dishid} does not exist`);
           err.status = 404;
-          return next(err);
+          next(err);
         }
       }, err => next(err))
       .catch(err => next(err));
@@ -152,20 +159,20 @@ dishRouter.route('/:dishid/comments/:commentid')
         } else if (dish === null) {
           const err = new Error(`Dish ${req.params.dishid} does not exist`);
           err.status = 404;
-          return next(err);
+          next(err);
         } else {
           const err = new Error(`comment ${req.params.commentid} does not exist`);
           err.status = 404;
-          return next(err);
+          next(err);
         }
       }, err => next(err))
       .catch(err => next(err));
   })
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /dishes/ ${req.params.dishid}/comments/${req.params.commentid}`);
   })
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     Dishes.findById(req.params.dishid)
       .then((dish) => {
         if (dish && dish.comments.id(req.params.commentid)) {
@@ -184,34 +191,34 @@ dishRouter.route('/:dishid/comments/:commentid')
         } else if (dish === null) {
           const err = new Error(`Dish ${req.params.dishid} does not exist`);
           err.status = 404;
-          return next(err);
+          next(err);
         } else {
           const err = new Error(`comment ${req.params.commentid} does not exist`);
           err.status = 404;
-          return next(err);
+          next(err);
         }
       }, err => next(err))
       .catch(err => next(err));
   })
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Dishes.findById(req.params.dishid)
       .then((dish) => {
         if (dish && dish.comments.id(req.params.commentid)) {
           dish.comments.id(req.params.commentid).remove();
           dish.save()
-            .then((dish) => {
+            .then((response) => {
               res.statusCode = 200;
               res.setHeader('Content-type', 'application/json');
-              res.json(dish);
+              res.json(response);
             }, err => next(err));
         } else if (dish === null) {
           const err = new Error(`Dish ${req.params.dishid} does not exist`);
           err.status = 404;
-          return next(err);
+          next(err);
         } else {
           const err = new Error(`comment ${req.params.commentid} does not exist`);
           err.status = 404;
-          return next(err);
+          next(err);
         }
       }, err => next(err))
       .catch(err => next(err));
