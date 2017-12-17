@@ -24,7 +24,7 @@ dishRouter.route('/')
       .catch(err => next(err));
   })
   //  authenticate the user in case the post method is needed
-  .post(authenticate.verifyUser, (req, res, next) => {
+  .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dishes.create(req.body)
       .then((dish) => {
         console.log('Dish Created', dish);
@@ -59,11 +59,11 @@ dishRouter.route('/:dishid')
       }, err => next(err))
       .catch(err => next(err));
   })
-  .post(authenticate.verifyUser, (req, res, next) => {
+  .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on dishes/ ${req.params.dishid}`);
   })
-  .put(authenticate.verifyUser, (req, res, next) => {
+  .put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dishes.findByIdAndUpdate(req.params.dishid, {
       $set: req.body,
     }, { new: true })
@@ -74,7 +74,7 @@ dishRouter.route('/:dishid')
       }, err => next(err))
       .catch(err => next(err));
   })
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dishes.findByIdAndRemove(req.params.dishid)
       .then((response) => {
         res.statusCode = 200;
@@ -126,7 +126,7 @@ dishRouter.route('/:dishid/comments')
     res.statusCode = 403;
     res.end(`PUT operation not supported on /dishes/${req.params.dishid}/comments`);
   })
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dishes.findById(req.params.dishid)
       .then((dish) => {
         if (dish) {
