@@ -43,16 +43,13 @@ exports.jwtPassport = passport.use(new JwtStrategy(
 exports.verifyUser = passport.authenticate('jwt', { session: false });
 exports.verifyAdmin = (req, res, next) => {
   if (req.user.admin) {
-    res.statusCode = 200;
-    res.setHeader('Content-type', 'application/json');
-    res.json('You have successfully removed all dishes');
     next();
   } else {
     res.statusCode = 401;
     const err = new Error('You are not authorized to perform this operation');
     next(err);
   }
-}
+};
 
 // getting a dish can be done by anybody
 

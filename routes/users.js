@@ -12,9 +12,17 @@ const authenticate = require('../authenticate');
 
 router.use(bodyParser.json());
 
-/* GET users listing. */
-router.get('/', (req, res, next) => {
-  res.send('respond with a resource');
+
+// show all Users only if you're admins
+router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+  User.find({})
+    .then((users) => {
+      res.statusCode = 200;
+      res.setHeader('Content-type', 'application/json');
+      console.log('----------', users);
+      res.json(users);
+    }, err => next(err))
+    .catch(err => next(err));
 });
 
 router.post('/signup', (req, res, next) => {
