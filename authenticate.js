@@ -26,7 +26,6 @@ opts.secretOrKey = config.secretKey;
 exports.jwtPassport = passport.use(new JwtStrategy(
   opts,
   (jwtPayload, done) => {
-    console.log('JWT payload: ', jwtPayload);
     User.findOne(
       { _id: jwtPayload._id },
       (err, user) => {
@@ -42,3 +41,29 @@ exports.jwtPassport = passport.use(new JwtStrategy(
 ));
 
 exports.verifyUser = passport.authenticate('jwt', { session: false });
+exports.verifyAdmin = (req, res, next) => {
+  if (req.user.admin) {
+    res.statusCode = 200;
+    res.setHeader('Content-type', 'application/json');
+    res.json('You have successfully removed all dishes');
+    next();
+  } else {
+    res.statusCode = 401;
+    const err = new Error('You are not authorized to perform this operation');
+    next(err);
+  }
+}
+
+// getting a dish can be done by anybody
+
+// deleting/editing/updating the dishes and get /users can only happen if you're an admin
+
+// You are not authorized to perform this operation!
+
+// authenticate.verifyUser, authenticate.verifyAdmin
+// if success perform the operation
+// if not You are not authorized to perform this operation!
+
+// Deleting a specific comment is only possible by an author of a comment
+// if not an author send the Error
+// you are not authorized to delete the comment
