@@ -1,5 +1,6 @@
 /* eslint no-unused-vars: 1 */
 /* eslint no-underscore-dangle: 1 */
+/* eslint no-param-reassign: 1 */
 
 const express = require('express');
 
@@ -25,12 +26,26 @@ router.post('/signup', (req, res, next) => {
         res.setHeader('Content-type', 'application/json');
         res.json({ err });
       } else {
-        passport.authenticate('local')(req, res, () => {
-          res.statusCode = 200;
-          res.setHeader('Content-type', 'application/json');
-          res.json({
-            success: true,
-            status: 'Registration Successfull',
+        if (req.body.firstname) {
+          user.firstname = req.body.firstname;
+        }
+        if (req.body.lastname) {
+          user.lastname = req.body.lastname;
+        }
+        user.save((err2, modifiedUser) => {
+          if (err2) {
+            res.statusCode = 500;
+            res.setHeader('Content-type', 'application/json');
+            res.json({ err2 });
+            return;
+          }
+          passport.authenticate('local')(req, res, () => {
+            res.statusCode = 200;
+            res.setHeader('Content-type', 'application/json');
+            res.json({
+              success: true,
+              status: 'Registration Successfull',
+            });
           });
         });
       }
