@@ -51,7 +51,7 @@ dishRouter.route('/')
 dishRouter.route('/:dishid')
   .get((req, res, next) => {
     Dishes.findById(req.params.dishid)
-      .populate('comments.user')
+      .populate('comments.author')
       .then((dish) => {
         res.statusCode = 200;
         res.setHeader('Content-type', 'application/json');
@@ -87,10 +87,9 @@ dishRouter.route('/:dishid')
 dishRouter.route('/:dishid/comments')
   .get((req, res, next) => {
     Dishes.findById(req.params.dishid)
-      .populate('comments.user')
+      .populate('comments.author')
       .then((dish) => {
         if (dish) {
-          req.body.author = req.user._id;
           res.statusCode = 200;
           res.setHeader('Content-type', 'application/json');
           res.json(dish.comments);
@@ -106,6 +105,7 @@ dishRouter.route('/:dishid/comments')
     Dishes.findById(req.params.dishid)
       .then((dish) => {
         if (dish) {
+          req.body.author = req.user._id;
           dish.comments.push(req.body);
           dish.save()
             .then((dishWithComments) => {
@@ -154,7 +154,7 @@ dishRouter.route('/:dishid/comments')
 dishRouter.route('/:dishid/comments/:commentid')
   .get((req, res, next) => {
     Dishes.findById(req.params.dishid)
-      .populate('comments.user')
+      .populate('comments.author')
       .then((dish) => {
         if (dish && dish.comments.id(req.params.commentid)) {
           res.statusCode = 200;
