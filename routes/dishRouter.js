@@ -180,18 +180,24 @@ dishRouter.route('/:dishid/comments/:commentid')
     Dishes.findById(req.params.dishid)
       .then((dish) => {
         if (dish && dish.comments.id(req.params.commentid)) {
-          if (req.body.rating) {
-            dish.comments.id(req.params.commentid).rating = req.body.rating;
+          if (req.user._id.equals(dish.comments.id(req.params.commentid).author)) {
+            if (req.body.rating) {
+              dish.comments.id(req.params.commentid).rating = req.body.rating;
+            }
+            if (req.body.comment) {
+              dish.comments.id(req.params.commentid).comment = req.body.comment;
+            }
+            dish.save()
+              .then((dishSaved) => {
+                res.statusCode = 200;
+                res.setHeader('Content-type', 'application/json');
+                res.json(dishSaved);
+              }, err => console.log(err));
+          } else {
+            res.statusCode = 401;
+            const err = new Error('You are not authorized to perform this operation');
+            next(err);
           }
-          if (req.body.comment) {
-            dish.comments.id(req.params.commentid).comment = req.body.comment;
-          }
-          dish.save()
-            .then((dishSaved) => {
-              res.statusCode = 200;
-              res.setHeader('Content-type', 'application/json');
-              res.json(dishSaved);
-            }, err => console.log(err));
         } else if (dish === null) {
           const err = new Error(`Dish ${req.params.dishid} does not exist`);
           err.status = 404;
@@ -208,13 +214,20 @@ dishRouter.route('/:dishid/comments/:commentid')
     Dishes.findById(req.params.dishid)
       .then((dish) => {
         if (dish && dish.comments.id(req.params.commentid)) {
-          dish.comments.id(req.params.commentid).remove();
-          dish.save()
-            .then((response) => {
-              res.statusCode = 200;
-              res.setHeader('Content-type', 'application/json');
-              res.json(response);
-            }, err => next(err));
+          if (req.user._id.equals(dish.comments.id(req.params.commentid).author)) {
+            console.log('comment IS', dish.comments.id(req.params.commentid));
+            dish.comments.id(req.params.commentid).remove();
+            dish.save()
+              .then((response) => {
+                res.statusCode = 200;
+                res.setHeader('Content-type', 'application/json');
+                res.json(response);
+              }, err => next(err));
+          } else {
+            res.statusCode = 401;
+            const err = new Error('You are not authorized to perform this operation');
+            next(err);
+          }
         } else if (dish === null) {
           const err = new Error(`Dish ${req.params.dishid} does not exist`);
           err.status = 404;
